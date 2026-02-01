@@ -302,7 +302,9 @@ function downloadCard(years, days){
 
   // Load image
   const img = new Image();
-  img.src = "card-photo.jpg"; // JPEG is OK
+  img.crossOrigin = "anonymous"; // This is needed if the image is from a different origin
+  img.src = "card-photo.jpeg";
+
   img.onload = () => {
 
     const frameX = 220;
