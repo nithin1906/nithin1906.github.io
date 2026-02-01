@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<title>Kwinna 💌 Valentine</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Dancing+Script:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --pink:#ff5c8a;
+  --pink2:#ff9cc3;
+  --bg1:#fff0f6;
+  --bg2:#fffaf2;
+}
+
+html,body{
+  margin:0;
+  height:100%;
+  font-family:Poppins,system-ui;
+}
+
+body{
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  overflow:hidden;
+}
+
+button{
+  touch-action:manipulation;
+}
+
+.card{
+  background:white;
+  padding:26px;
+  border-radius:22px;
+  width:min(900px,100%);
+  box-shadow:0 24px 60px rgba(0,0,0,.12);
+}
+
+h1{
+  margin:0;
+  font-size:26px;
+}
+
+.sub{
+  color:#666;
+  margin:10px 0 22px;
+}
+
+.buttons{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+}
+
+button{
+  border:0;
+  border-radius:14px;
+  padding:14px 20px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.yes{
+  background:linear-gradient(90deg,var(--pink),var(--pink2));
+  color:white;
+}
+
+.no{
+  background:white;
+  border:2px dashed #ffd1e3;
+  color:var(--pink);
+}
+
+.maybe{
+  background:#fff4fa;
+}
+
+.note{
+  margin-top:14px;
+  color:#777;
+  font-size:14px;
+}
+
+/* Overlay */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(10,10,20,.55);
+  backdrop-filter:blur(8px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:99;
+  padding:16px;
+}
+
+.modal{
+  background:white;
+  border-radius:18px;
+  padding:22px;
+  width:min(720px,100%);
+  max-height:92vh;
+  overflow:auto;
+  box-shadow:0 40px 90px rgba(0,0,0,.35);
+}
+
+/* Loader */
+.loader{
+  font-family:monospace;
+  background:#0f1220;
+  color:#d9e0ff;
+  padding:18px;
+  border-radius:14px;
+}
+
+.progress{
+  height:10px;
+  background:#222;
+  margin-top:12px;
+  border-radius:6px;
+  overflow:hidden;
+}
+
+.bar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#6cf,#f8f);
+  transition:width .4s ease;
+}
+
+/* Stickman GIF */
+.stickman{
+  text-align:center;
+}
+
+.stickman img{
+  max-height:40vh;
+  max-width:70vw;
+  object-fit:contain;
+  display:block;
+  margin:0 auto 12px;
+}
+
+/* Hearts */
+.heart{
+  position:fixed;
+  font-size:22px;
+  animation:floatUp 2.6s ease-out forwards;
+  pointer-events:none;
+}
+
+@keyframes floatUp{
+  from{transform:translateY(0) scale(.8);opacity:0}
+  20%{opacity:1}
+  to{transform:translateY(-140px) scale(1.1);opacity:0}
+}
+
+/* Letter */
+.letter{
+  font-family:"Dancing Script",cursive;
+  font-size:22px;
+  line-height:1.6;
+  color:#333;
+}
+
+.letter h2{
+  font-size:30px;
+  color:var(--pink);
+  margin-top:0;
+}
+
+.signature{
+  margin-top:18px;
+  font-size:26px;
+  color:var(--pink);
+}
+
+.download{
+  margin-top:18px;
+  width:100%;
+  background:linear-gradient(90deg,var(--pink),var(--pink2));
+  color:white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>Okay but… will you be my Valentine again, Kwinna? 💌</h1>
+  <p class="sub">Engineered romance. Version 1.22 (stable release).</p>
+
+  <div class="buttons">
+    <button class="yes" id="yesBtn">Yes 💖</button>
+    <button class="no" id="noBtn">No (this button is broken 🙃)</button>
+    <button class="maybe" id="maybeBtn">Maybe 🌸</button>
+  </div>
+
+  <div class="note" id="note">Awaiting user input…</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+const overlay = document.getElementById("overlay");
+const modal = document.getElementById("modal");
+const note = document.getElementById("note");
+
+document.getElementById("yesBtn").onclick = () => {
+  note.innerText = "YES received. Gratitude protocol initiated.";
+  runStickman();
+};
+
+document.getElementById("maybeBtn").onclick = () => {
+  note.innerText = "Converting MAYBE → YES…";
+  runMaybeFlow();
+};
+
+document.getElementById("noBtn").onmouseenter = e => {
+  e.target.style.transform =
+    `translate(${Math.random()*160-80}px,${Math.random()*100-50}px)`;
+};
+
+function openModal(html){
+  modal.innerHTML = html;
+  overlay.style.display = "flex";
+}
+
+function closeModal(){
+  overlay.style.display = "none";
+}
+
+/* Maybe → Yes */
+function runMaybeFlow(){
+  openModal(`
+    <div class="loader">
+      > Parsing emotional variables…<br>
+      > Running affection algorithm…<br>
+      > <strong>Conversion in progress</strong>
+      <div class="progress"><div class="bar" id="bar"></div></div>
+    </div>
+  `);
+
+  let p = 0;
+  const bar = document.getElementById("bar");
+  const i = setInterval(()=>{
+    p += 25;
+    bar.style.width = p + "%";
+    if(p >= 100){
+      clearInterval(i);
+      setTimeout(runStickman, 600);
+    }
+  }, 500);
+}
+
+/* Stickman GIF */
+function runStickman(){
+  openModal(`
+    <div class="stickman">
+      <img src="stickman-bow.gif" alt="Stickman bowing thank you">
+      <p><strong>Thank you, Kwinna.</strong><br>Nithi appreciates you 💖</p>
+    </div>
+  `);
+
+  setTimeout(() => spawnHearts(14), 700);
+  setTimeout(showLetter, 1900);
+}
+
+/* Letter */
+function showLetter(){
+  openModal(`
+    <div class="letter">
+      <h2>Dear Kwinna,</h2>
+
+      <p>
+        It’s been <strong>1 year and 22 days</strong> since this all began —
+        and somehow every day since has felt warmer, steadier, and more like home.
+      </p>
+
+      <p>
+        Loving you isn’t loud. It’s quiet confidence. It’s choosing you again,
+        even on ordinary days — especially on those.
+      </p>
+
+      <p class="signature">
+        Always yours,<br>
+        Nithi 💖
+      </p>
+
+      <button class="download" onclick="downloadCard()">
+        Download Valentine Approval Card 💌
+      </button>
+
+      <div style="text-align:center;margin-top:10px">
+        <button class="maybe" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  `);
+}
+
+/* Hearts */
+function spawnHearts(n){
+  for(let i=0;i<n;i++){
+    const h = document.createElement("div");
+    h.className = "heart";
+    h.innerText = "💖";
+    h.style.left = Math.random()*100 + "%";
+    h.style.bottom = "40%";
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),2600);
+  }
+}
+
+/* Card download */
+function downloadCard(){
+  const c = document.createElement("canvas");
+  c.width = 1080;
+  c.height = 1350;
+  const ctx = c.getContext("2d");
+
+  ctx.fillStyle = "#fff0f6";
+  ctx.fillRect(0,0,c.width,c.height);
+
+  ctx.fillStyle = "#ff5c8a";
+  ctx.font = "bold 64px Poppins";
+  ctx.textAlign = "center";
+  ctx.fillText("Valentine Approved 💖",540,260);
+
+  ctx.fillStyle = "#333";
+  ctx.font = "48px Poppins";
+  ctx.fillText("Kwinna & Nithi",540,380);
+
+  ctx.font = "36px Poppins";
+  ctx.fillText("1 Year + 22 Days",540,460);
+
+  ctx.font = "28px Poppins";
+  ctx.fillText("Certified with Love",540,540);
+
+  const a = document.createElement("a");
+  a.href = c.toDataURL();
+  a.download = "valentine-approved.png";
+  a.click();
+}
+</script>
+
+</body>
+</html>
