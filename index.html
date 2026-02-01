@@ -72,6 +72,21 @@ button{
   box-shadow:0 40px 90px rgba(0,0,0,.35);
 }
 
+/* Cute Maybe loader */
+.cute-loader{
+  text-align:center;
+  font-size:18px;
+}
+.cute-loader .heart{
+  font-size:32px;
+  animation:pulse 1s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.3)}
+  100%{transform:scale(1)}
+}
+
 /* Stickman */
 .stickman{text-align:center;}
 .stickman img{
@@ -82,8 +97,8 @@ button{
   margin:0 auto 12px;
 }
 
-/* Hearts */
-.heart{
+/* Floating hearts */
+.float-heart{
   position:fixed;
   font-size:22px;
   animation:floatUp 2.6s ease-out forwards;
@@ -125,7 +140,7 @@ button{
 
 <div class="card">
   <h1>Okay but… will you be my Valentine again, Kwinna? 💌</h1>
-  <p class="sub">Engineered romance - exclusively for you.</p>
+  <p class="sub">Engineered romance. Soft decisions encouraged.</p>
 
   <div class="buttons">
     <button class="yes" id="yesBtn">Yes 💖</button>
@@ -133,7 +148,7 @@ button{
     <button class="maybe" id="maybeBtn">Maybe 🌸</button>
   </div>
 
-  <div class="note" id="note">Awaiting user input…</div>
+  <div class="note">Awaiting user input…</div>
 </div>
 
 <div class="overlay" id="overlay">
@@ -142,30 +157,21 @@ button{
 
 <script>
 /* ===============================
-   START DATE (FIXED & SIMPLE)
+   DATE LOGIC (CORRECT)
    =============================== */
-const START_DATE = new Date(2025, 0, 10); // Jan 10, 2025 (month is 0-indexed)
+const START_DATE = new Date(2025, 0, 10); // Jan 10, 2025
 
-/* Normalize date to midnight */
 function atMidnight(d){
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-/* ===============================
-   DAY-BASED CALCULATION (CORRECT)
-   =============================== */
 function calculateDuration(){
   const start = atMidnight(START_DATE);
   const today = atMidnight(new Date());
-
-  const totalDays = Math.floor(
-    (today - start) / (1000 * 60 * 60 * 24)
-  );
-
+  const totalDays = Math.floor((today - start) / 86400000);
   const years = Math.floor(totalDays / 365);
   const days = totalDays % 365;
-
-  return { years, days, totalDays };
+  return { years, days };
 }
 
 /* ===============================
@@ -174,38 +180,28 @@ function calculateDuration(){
 function animateCounter(targetYears, targetDays, el){
   const duration = 1200;
   const start = performance.now();
-
   function easeOut(t){ return 1 - Math.pow(1 - t, 3); }
 
   function tick(now){
-    const progress = Math.min((now - start) / duration, 1);
-    const eased = easeOut(progress);
-
-    const y = Math.floor(eased * targetYears);
-    const d = Math.floor(eased * targetDays);
-
-    el.innerHTML =
-      `<strong>${y} year${y!==1?'s':''} and ${d} day${d!==1?'s':''}</strong>`;
-
-    if(progress < 1){
-      requestAnimationFrame(tick);
-    } else {
-      el.innerHTML =
-        `<strong>${targetYears} year${targetYears!==1?'s':''} and ${targetDays} day${targetDays!==1?'s':''}</strong>`;
-    }
+    const p = Math.min((now - start) / duration, 1);
+    const e = easeOut(p);
+    const y = Math.floor(e * targetYears);
+    const d = Math.floor(e * targetDays);
+    el.innerHTML = `<strong>${y} year${y!==1?'s':''} and ${d} day${d!==1?'s':''}</strong>`;
+    if(p < 1) requestAnimationFrame(tick);
+    else el.innerHTML = `<strong>${targetYears} year${targetYears!==1?'s':''} and ${targetDays} day${targetDays!==1?'s':''}</strong>`;
   }
   requestAnimationFrame(tick);
 }
 
 /* ===============================
-   UI LOGIC
+   UI FLOW
    =============================== */
 const overlay = document.getElementById("overlay");
 const modal = document.getElementById("modal");
 
 document.getElementById("yesBtn").onclick = runStickman;
-document.getElementById("maybeBtn").onclick = runStickman;
-
+document.getElementById("maybeBtn").onclick = runMaybeFlow;
 document.getElementById("noBtn").onmouseenter = e=>{
   e.target.style.transform =
     `translate(${Math.random()*160-80}px,${Math.random()*100-50}px)`;
@@ -215,12 +211,25 @@ function openModal(html){
   modal.innerHTML = html;
   overlay.style.display = "flex";
 }
-function closeModal(){
-  overlay.style.display = "none";
+function closeModal(){ overlay.style.display="none"; }
+
+/* ===============================
+   MAYBE → YES (CUTE VERSION)
+   =============================== */
+function runMaybeFlow(){
+  openModal(`
+    <div class="cute-loader">
+      <div class="heart">💗</div>
+      <p>Thinking…</p>
+      <p>Smiling…</p>
+      <p><strong>Okay yeah 💖</strong></p>
+    </div>
+  `);
+  setTimeout(runStickman, 1800);
 }
 
 /* ===============================
-   FLOW
+   YES FLOW
    =============================== */
 function runStickman(){
   openModal(`
@@ -235,32 +244,25 @@ function runStickman(){
 
 function showLetter(){
   const { years, days } = calculateDuration();
-
   openModal(`
     <div class="letter">
       <h2>Dear Kwinna,</h2>
-
       <p>
         It’s been <span id="counter"></span>
-        since January 10, 2025 — and somehow every single day since
+        since January 10, 2025 — and every single day since
         has felt more certain and more like home.
       </p>
-
       <p class="signature">
-        Always yours,<br>
-        Nithi 💖
+        Always yours,<br>Nithi 💖
       </p>
-
       <button class="download" onclick="downloadCard(${years}, ${days})">
         Download Valentine Approval Card 💌
       </button>
-
       <div style="text-align:center;margin-top:10px">
         <button class="maybe" onclick="closeModal()">Close</button>
       </div>
     </div>
   `);
-
   animateCounter(years, days, document.getElementById("counter"));
 }
 
@@ -270,7 +272,7 @@ function showLetter(){
 function spawnHearts(n){
   for(let i=0;i<n;i++){
     const h=document.createElement("div");
-    h.className="heart";
+    h.className="float-heart";
     h.innerText="💖";
     h.style.left=Math.random()*100+"%";
     h.style.bottom="40%";
