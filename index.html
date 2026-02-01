@@ -31,9 +31,7 @@ body{
   overflow:hidden;
 }
 
-button{
-  touch-action:manipulation;
-}
+button{ touch-action:manipulation; }
 
 .card{
   background:white;
@@ -43,10 +41,7 @@ button{
   box-shadow:0 24px 60px rgba(0,0,0,.12);
 }
 
-h1{
-  margin:0;
-  font-size:26px;
-}
+h1{ margin:0;font-size:26px; }
 
 .sub{
   color:#666;
@@ -78,9 +73,7 @@ button{
   color:var(--pink);
 }
 
-.maybe{
-  background:#fff4fa;
-}
+.maybe{ background:#fff4fa; }
 
 .note{
   margin-top:14px;
@@ -111,35 +104,8 @@ button{
   box-shadow:0 40px 90px rgba(0,0,0,.35);
 }
 
-/* Loader */
-.loader{
-  font-family:monospace;
-  background:#0f1220;
-  color:#d9e0ff;
-  padding:18px;
-  border-radius:14px;
-}
-
-.progress{
-  height:10px;
-  background:#222;
-  margin-top:12px;
-  border-radius:6px;
-  overflow:hidden;
-}
-
-.bar{
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,#6cf,#f8f);
-  transition:width .4s ease;
-}
-
 /* Stickman GIF */
-.stickman{
-  text-align:center;
-}
-
+.stickman{text-align:center;}
 .stickman img{
   max-height:40vh;
   max-width:70vw;
@@ -195,7 +161,7 @@ button{
 
 <div class="card">
   <h1>Okay but… will you be my Valentine again, Kwinna? 💌</h1>
-  <p class="sub">Engineered romance. Version 1.22 (stable release).</p>
+  <p class="sub">Engineered romance. Auto-updating since day one.</p>
 
   <div class="buttons">
     <button class="yes" id="yesBtn">Yes 💖</button>
@@ -211,19 +177,78 @@ button{
 </div>
 
 <script>
+/* ===============================
+   CONFIG — SET THIS ONCE
+   =============================== */
+const START_DATE = new Date("2024-01-23"); // ← CHANGE IF NEEDED
+
+/* ===============================
+   DATE CALCULATION (FIXED)
+   =============================== */
+function calculateDuration(){
+  const today = new Date();
+
+  let years = today.getFullYear() - START_DATE.getFullYear();
+  let anniversary = new Date(
+    START_DATE.getFullYear() + years,
+    START_DATE.getMonth(),
+    START_DATE.getDate()
+  );
+
+  if (today < anniversary) {
+    years--;
+    anniversary = new Date(
+      START_DATE.getFullYear() + years,
+      START_DATE.getMonth(),
+      START_DATE.getDate()
+    );
+  }
+
+  const days = Math.floor(
+    (today - anniversary) / (1000 * 60 * 60 * 24)
+  );
+
+  return { years, days };
+}
+
+/* ===============================
+   COUNTER ANIMATION
+   =============================== */
+function animateCounter(targetYears, targetDays, el){
+  const duration = 1200;
+  const start = performance.now();
+
+  function easeOut(t){ return 1 - Math.pow(1 - t, 3); }
+
+  function tick(now){
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = easeOut(progress);
+
+    const y = Math.floor(eased * targetYears);
+    const d = Math.floor(eased * targetDays);
+
+    el.innerHTML =
+      `<strong>${y} year${y!==1?'s':''} and ${d} day${d!==1?'s':''}</strong>`;
+
+    if(progress < 1){
+      requestAnimationFrame(tick);
+    } else {
+      el.innerHTML =
+        `<strong>${targetYears} year${targetYears!==1?'s':''} and ${targetDays} day${targetDays!==1?'s':''}</strong>`;
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ===============================
+   UI LOGIC
+   =============================== */
 const overlay = document.getElementById("overlay");
 const modal = document.getElementById("modal");
 const note = document.getElementById("note");
 
-document.getElementById("yesBtn").onclick = () => {
-  note.innerText = "YES received. Gratitude protocol initiated.";
-  runStickman();
-};
-
-document.getElementById("maybeBtn").onclick = () => {
-  note.innerText = "Converting MAYBE → YES…";
-  runMaybeFlow();
-};
+document.getElementById("yesBtn").onclick = runStickman;
+document.getElementById("maybeBtn").onclick = runStickman;
 
 document.getElementById("noBtn").onmouseenter = e => {
   e.target.style.transform =
@@ -239,30 +264,9 @@ function closeModal(){
   overlay.style.display = "none";
 }
 
-/* Maybe → Yes */
-function runMaybeFlow(){
-  openModal(`
-    <div class="loader">
-      > Parsing emotional variables…<br>
-      > Running affection algorithm…<br>
-      > <strong>Conversion in progress</strong>
-      <div class="progress"><div class="bar" id="bar"></div></div>
-    </div>
-  `);
-
-  let p = 0;
-  const bar = document.getElementById("bar");
-  const i = setInterval(()=>{
-    p += 25;
-    bar.style.width = p + "%";
-    if(p >= 100){
-      clearInterval(i);
-      setTimeout(runStickman, 600);
-    }
-  }, 500);
-}
-
-/* Stickman GIF */
+/* ===============================
+   GIF → LETTER FLOW
+   =============================== */
 function runStickman(){
   openModal(`
     <div class="stickman">
@@ -271,43 +275,10 @@ function runStickman(){
     </div>
   `);
 
-  setTimeout(() => spawnHearts(14), 700);
-  setTimeout(showLetter, 1900);
+  setTimeout(()=>spawnHearts(14),700);
+  setTimeout(showLetter,1900);
 }
 
-function animateCounter(targetYears, targetDays, el) {
-  const duration = 1200; // ms
-  const start = performance.now();
-
-  function easeOutCubic(t) {
-    return 1 - Math.pow(1 - t, 3);
-  }
-
-  function tick(now) {
-    const progress = Math.min((now - start) / duration, 1);
-    const eased = easeOutCubic(progress);
-
-    const y = Math.floor(eased * targetYears);
-    const d = Math.floor(eased * targetDays);
-
-    el.innerHTML = `
-      <strong>${y} year${y !== 1 ? "s" : ""} and ${d} day${d !== 1 ? "s" : ""}</strong>
-    `;
-
-    if (progress < 1) {
-      requestAnimationFrame(tick);
-    } else {
-      // snap to exact final value (important)
-      el.innerHTML = `
-        <strong>${targetYears} year${targetYears !== 1 ? "s" : ""} and ${targetDays} day${targetDays !== 1 ? "s" : ""}</strong>
-      `;
-    }
-  }
-
-  requestAnimationFrame(tick);
-}
-
-/* Letter */
 function showLetter(){
   const { years, days } = calculateDuration();
 
@@ -341,53 +312,56 @@ function showLetter(){
     </div>
   `);
 
-  // Animate the counter once the modal is in the DOM
-  const counterEl = document.getElementById("counter");
-  animateCounter(years, days, counterEl);
+  animateCounter(years, days, document.getElementById("counter"));
 }
 
-
-/* Hearts */
+/* ===============================
+   EFFECTS
+   =============================== */
 function spawnHearts(n){
   for(let i=0;i<n;i++){
-    const h = document.createElement("div");
-    h.className = "heart";
-    h.innerText = "💖";
-    h.style.left = Math.random()*100 + "%";
-    h.style.bottom = "40%";
+    const h=document.createElement("div");
+    h.className="heart";
+    h.innerText="💖";
+    h.style.left=Math.random()*100+"%";
+    h.style.bottom="40%";
     document.body.appendChild(h);
     setTimeout(()=>h.remove(),2600);
   }
 }
 
-/* Card download */
-function downloadCard(){
-  const c = document.createElement("canvas");
-  c.width = 1080;
-  c.height = 1350;
-  const ctx = c.getContext("2d");
+/* ===============================
+   CARD DOWNLOAD
+   =============================== */
+function downloadCard(years, days){
+  const c=document.createElement("canvas");
+  c.width=1080;c.height=1350;
+  const ctx=c.getContext("2d");
 
-  ctx.fillStyle = "#fff0f6";
+  ctx.fillStyle="#fff0f6";
   ctx.fillRect(0,0,c.width,c.height);
 
-  ctx.fillStyle = "#ff5c8a";
-  ctx.font = "bold 64px Poppins";
-  ctx.textAlign = "center";
+  ctx.fillStyle="#ff5c8a";
+  ctx.font="bold 64px Poppins";
+  ctx.textAlign="center";
   ctx.fillText("Valentine Approved 💖",540,260);
 
-  ctx.fillStyle = "#333";
-  ctx.font = "48px Poppins";
+  ctx.fillStyle="#333";
+  ctx.font="48px Poppins";
   ctx.fillText("Kwinna & Nithi",540,380);
 
-  ctx.font = "36px Poppins";
-  ctx.fillText("1 Year + 22 Days",540,460);
+  ctx.font="36px Poppins";
+  ctx.fillText(
+    `${years} year${years!==1?'s':''} + ${days} day${days!==1?'s':''}`,
+    540,460
+  );
 
-  ctx.font = "28px Poppins";
+  ctx.font="28px Poppins";
   ctx.fillText("Certified with Love",540,540);
 
-  const a = document.createElement("a");
-  a.href = c.toDataURL();
-  a.download = "valentine-approved.png";
+  const a=document.createElement("a");
+  a.href=c.toDataURL();
+  a.download="valentine-approved.png";
   a.click();
 }
 </script>
