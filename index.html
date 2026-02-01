@@ -285,36 +285,108 @@ function spawnHearts(n){
    CARD
    =============================== */
 function downloadCard(years, days){
-  const c=document.createElement("canvas");
-  c.width=1080;c.height=1350;
-  const ctx=c.getContext("2d");
+  const c = document.createElement("canvas");
+  c.width = 1080;
+  c.height = 1350;
+  const ctx = c.getContext("2d");
 
-  ctx.fillStyle="#fff0f6";
+  // Background
+  ctx.fillStyle = "#fff0f6";
   ctx.fillRect(0,0,c.width,c.height);
 
-  ctx.fillStyle="#ff5c8a";
-  ctx.font="bold 64px Poppins";
-  ctx.textAlign="center";
-  ctx.fillText("Valentine Approved 💖",540,260);
+  // Title
+  ctx.fillStyle = "#ff5c8a";
+  ctx.font = "bold 64px Poppins";
+  ctx.textAlign = "center";
+  ctx.fillText("Valentine Approved 💖",540,170);
 
-  ctx.fillStyle="#333";
-  ctx.font="48px Poppins";
-  ctx.fillText("Kwinna & Nithi",540,380);
+  // Load image
+  const img = new Image();
+  img.src = "card-photo.jpg"; // JPEG is OK
+  img.onload = () => {
 
-  ctx.font="36px Poppins";
-  ctx.fillText(
-    `${years} year${years!==1?'s':''} + ${days} day${days!==1?'s':''}`,
-    540,460
-  );
+    const frameX = 220;
+    const frameY = 240;
+    const frameSize = 640;
+    const radius = 36;
 
-  ctx.font="28px Poppins";
-  ctx.fillText("Certified with Love",540,540);
+    // Soft pink frame
+    ctx.fillStyle = "#ffd6e8";
+    ctx.beginPath();
+    ctx.moveTo(frameX + radius, frameY);
+    ctx.lineTo(frameX + frameSize - radius, frameY);
+    ctx.quadraticCurveTo(frameX + frameSize, frameY, frameX + frameSize, frameY + radius);
+    ctx.lineTo(frameX + frameSize, frameY + frameSize - radius);
+    ctx.quadraticCurveTo(frameX + frameSize, frameY + frameSize, frameX + frameSize - radius, frameY + frameSize);
+    ctx.lineTo(frameX + radius, frameY + frameSize);
+    ctx.quadraticCurveTo(frameX, frameY + frameSize, frameX, frameY + frameSize - radius);
+    ctx.lineTo(frameX, frameY + radius);
+    ctx.quadraticCurveTo(frameX, frameY, frameX + radius, frameY);
+    ctx.closePath();
+    ctx.fill();
 
-  const a=document.createElement("a");
-  a.href=c.toDataURL();
-  a.download="valentine-approved.png";
-  a.click();
+    // Inner clip (image area)
+    const padding = 14;
+    const imgX = frameX + padding;
+    const imgY = frameY + padding;
+    const imgSize = frameSize - padding*2;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(imgX + radius, imgY);
+    ctx.lineTo(imgX + imgSize - radius, imgY);
+    ctx.quadraticCurveTo(imgX + imgSize, imgY, imgX + imgSize, imgY + radius);
+    ctx.lineTo(imgX + imgSize, imgY + imgSize - radius);
+    ctx.quadraticCurveTo(imgX + imgSize, imgY + imgSize, imgX + imgSize - radius, imgY + imgSize);
+    ctx.lineTo(imgX + radius, imgY + imgSize);
+    ctx.quadraticCurveTo(imgX, imgY + imgSize, imgX, imgY + imgSize - radius);
+    ctx.lineTo(imgX, imgY + radius);
+    ctx.quadraticCurveTo(imgX, imgY, imgX + radius, imgY);
+    ctx.closePath();
+    ctx.clip();
+
+    // --- Image cover scaling (center-crop, Instagram style) ---
+    const scale = Math.max(imgSize / img.width, imgSize / img.height);
+    const sw = imgSize / scale;
+    const sh = imgSize / scale;
+    const sx = (img.width - sw) / 2;
+    const sy = (img.height - sh) / 2;
+
+    ctx.drawImage(
+      img,
+      sx, sy, sw, sh,
+      imgX, imgY, imgSize, imgSize
+    );
+
+    ctx.restore();
+
+    // Tiny heart overlay 💖
+    ctx.fillStyle = "#ff5c8a";
+    ctx.font = "48px Poppins";
+    ctx.fillText("💖", imgX + imgSize - 48, imgY + 52);
+
+    // Text below image
+    ctx.fillStyle = "#333";
+    ctx.font = "48px Poppins";
+    ctx.fillText("Kwinna & Nithi",540,980);
+
+    ctx.font = "36px Poppins";
+    ctx.fillText(
+      `${years} year${years!==1?'s':''} + ${days} day${days!==1?'s':''}`,
+      540,1050
+    );
+
+    ctx.font = "28px Poppins";
+    ctx.fillText("Certified with Love 💌",540,1120);
+
+    // Download
+    const a = document.createElement("a");
+    a.href = c.toDataURL("image/png");
+    a.download = "valentine-approved.png";
+    a.click();
+  };
 }
+
 </script>
 
 </body>
