@@ -15,13 +15,11 @@
   --bg1:#fff0f6;
   --bg2:#fffaf2;
 }
-
 html,body{
   margin:0;
   height:100%;
   font-family:Poppins,system-ui;
 }
-
 body{
   background:linear-gradient(135deg,var(--bg1),var(--bg2));
   display:flex;
@@ -30,9 +28,7 @@ body{
   padding:20px;
   overflow:hidden;
 }
-
 button{ touch-action:manipulation; }
-
 .card{
   background:white;
   padding:26px;
@@ -40,46 +36,19 @@ button{ touch-action:manipulation; }
   width:min(900px,100%);
   box-shadow:0 24px 60px rgba(0,0,0,.12);
 }
-
 h1{ margin:0;font-size:26px; }
-
-.sub{
-  color:#666;
-  margin:10px 0 22px;
-}
-
-.buttons{
-  display:flex;
-  gap:14px;
-  flex-wrap:wrap;
-}
-
+.sub{ color:#666;margin:10px 0 22px; }
+.buttons{ display:flex;gap:14px;flex-wrap:wrap; }
 button{
-  border:0;
-  border-radius:14px;
+  border:0;border-radius:14px;
   padding:14px 20px;
   font-weight:600;
   cursor:pointer;
 }
-
-.yes{
-  background:linear-gradient(90deg,var(--pink),var(--pink2));
-  color:white;
-}
-
-.no{
-  background:white;
-  border:2px dashed #ffd1e3;
-  color:var(--pink);
-}
-
+.yes{ background:linear-gradient(90deg,var(--pink),var(--pink2));color:white; }
+.no{ background:white;border:2px dashed #ffd1e3;color:var(--pink); }
 .maybe{ background:#fff4fa; }
-
-.note{
-  margin-top:14px;
-  color:#777;
-  font-size:14px;
-}
+.note{ margin-top:14px;color:#777;font-size:14px; }
 
 /* Overlay */
 .overlay{
@@ -93,7 +62,6 @@ button{
   z-index:99;
   padding:16px;
 }
-
 .modal{
   background:white;
   border-radius:18px;
@@ -104,7 +72,7 @@ button{
   box-shadow:0 40px 90px rgba(0,0,0,.35);
 }
 
-/* Stickman GIF */
+/* Stickman */
 .stickman{text-align:center;}
 .stickman img{
   max-height:40vh;
@@ -121,7 +89,6 @@ button{
   animation:floatUp 2.6s ease-out forwards;
   pointer-events:none;
 }
-
 @keyframes floatUp{
   from{transform:translateY(0) scale(.8);opacity:0}
   20%{opacity:1}
@@ -135,19 +102,16 @@ button{
   line-height:1.6;
   color:#333;
 }
-
 .letter h2{
   font-size:30px;
   color:var(--pink);
   margin-top:0;
 }
-
 .signature{
   margin-top:18px;
   font-size:26px;
   color:var(--pink);
 }
-
 .download{
   margin-top:18px;
   width:100%;
@@ -161,7 +125,7 @@ button{
 
 <div class="card">
   <h1>Okay but… will you be my Valentine again, Kwinna? 💌</h1>
-  <p class="sub">Engineered romance. Auto-updating since day one.</p>
+  <p class="sub">Engineered romance - exclusively for you.</p>
 
   <div class="buttons">
     <button class="yes" id="yesBtn">Yes 💖</button>
@@ -178,37 +142,30 @@ button{
 
 <script>
 /* ===============================
-   CONFIG — SET THIS ONCE
+   START DATE (FIXED & SIMPLE)
    =============================== */
-const START_DATE = new Date("2024-01-23"); // ← CHANGE IF NEEDED
+const START_DATE = new Date(2025, 0, 10); // Jan 10, 2025 (month is 0-indexed)
+
+/* Normalize date to midnight */
+function atMidnight(d){
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
 
 /* ===============================
-   DATE CALCULATION (FIXED)
+   DAY-BASED CALCULATION (CORRECT)
    =============================== */
 function calculateDuration(){
-  const today = new Date();
+  const start = atMidnight(START_DATE);
+  const today = atMidnight(new Date());
 
-  let years = today.getFullYear() - START_DATE.getFullYear();
-  let anniversary = new Date(
-    START_DATE.getFullYear() + years,
-    START_DATE.getMonth(),
-    START_DATE.getDate()
+  const totalDays = Math.floor(
+    (today - start) / (1000 * 60 * 60 * 24)
   );
 
-  if (today < anniversary) {
-    years--;
-    anniversary = new Date(
-      START_DATE.getFullYear() + years,
-      START_DATE.getMonth(),
-      START_DATE.getDate()
-    );
-  }
+  const years = Math.floor(totalDays / 365);
+  const days = totalDays % 365;
 
-  const days = Math.floor(
-    (today - anniversary) / (1000 * 60 * 60 * 24)
-  );
-
-  return { years, days };
+  return { years, days, totalDays };
 }
 
 /* ===============================
@@ -245,12 +202,11 @@ function animateCounter(targetYears, targetDays, el){
    =============================== */
 const overlay = document.getElementById("overlay");
 const modal = document.getElementById("modal");
-const note = document.getElementById("note");
 
 document.getElementById("yesBtn").onclick = runStickman;
 document.getElementById("maybeBtn").onclick = runStickman;
 
-document.getElementById("noBtn").onmouseenter = e => {
+document.getElementById("noBtn").onmouseenter = e=>{
   e.target.style.transform =
     `translate(${Math.random()*160-80}px,${Math.random()*100-50}px)`;
 };
@@ -259,13 +215,12 @@ function openModal(html){
   modal.innerHTML = html;
   overlay.style.display = "flex";
 }
-
 function closeModal(){
   overlay.style.display = "none";
 }
 
 /* ===============================
-   GIF → LETTER FLOW
+   FLOW
    =============================== */
 function runStickman(){
   openModal(`
@@ -274,7 +229,6 @@ function runStickman(){
       <p><strong>Thank you, Kwinna.</strong><br>Nithi appreciates you 💖</p>
     </div>
   `);
-
   setTimeout(()=>spawnHearts(14),700);
   setTimeout(showLetter,1900);
 }
@@ -288,13 +242,8 @@ function showLetter(){
 
       <p>
         It’s been <span id="counter"></span>
-        since this all began — and somehow every day since has felt warmer,
-        steadier, and more like home.
-      </p>
-
-      <p>
-        Loving you isn’t loud. It’s quiet confidence.
-        It’s choosing you again, every single day.
+        since January 10, 2025 — and somehow every single day since
+        has felt more certain and more like home.
       </p>
 
       <p class="signature">
@@ -331,7 +280,7 @@ function spawnHearts(n){
 }
 
 /* ===============================
-   CARD DOWNLOAD
+   CARD
    =============================== */
 function downloadCard(years, days){
   const c=document.createElement("canvas");
