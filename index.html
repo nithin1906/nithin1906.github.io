@@ -275,20 +275,55 @@ function runStickman(){
   setTimeout(showLetter, 1900);
 }
 
+function animateCounter(targetYears, targetDays, el) {
+  const duration = 1200; // ms
+  const start = performance.now();
+
+  function easeOutCubic(t) {
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function tick(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = easeOutCubic(progress);
+
+    const y = Math.floor(eased * targetYears);
+    const d = Math.floor(eased * targetDays);
+
+    el.innerHTML = `
+      <strong>${y} year${y !== 1 ? "s" : ""} and ${d} day${d !== 1 ? "s" : ""}</strong>
+    `;
+
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      // snap to exact final value (important)
+      el.innerHTML = `
+        <strong>${targetYears} year${targetYears !== 1 ? "s" : ""} and ${targetDays} day${targetDays !== 1 ? "s" : ""}</strong>
+      `;
+    }
+  }
+
+  requestAnimationFrame(tick);
+}
+
 /* Letter */
 function showLetter(){
+  const { years, days } = calculateDuration();
+
   openModal(`
     <div class="letter">
       <h2>Dear Kwinna,</h2>
 
       <p>
-        It’s been <strong>1 year and 22 days</strong> since this all began —
-        and somehow every day since has felt warmer, steadier, and more like home.
+        It’s been <span id="counter"></span>
+        since this all began — and somehow every day since has felt warmer,
+        steadier, and more like home.
       </p>
 
       <p>
-        Loving you isn’t loud. It’s quiet confidence. It’s choosing you again,
-        even on ordinary days — especially on those.
+        Loving you isn’t loud. It’s quiet confidence.
+        It’s choosing you again, every single day.
       </p>
 
       <p class="signature">
@@ -296,7 +331,7 @@ function showLetter(){
         Nithi 💖
       </p>
 
-      <button class="download" onclick="downloadCard()">
+      <button class="download" onclick="downloadCard(${years}, ${days})">
         Download Valentine Approval Card 💌
       </button>
 
@@ -305,7 +340,12 @@ function showLetter(){
       </div>
     </div>
   `);
+
+  // Animate the counter once the modal is in the DOM
+  const counterEl = document.getElementById("counter");
+  animateCounter(years, days, counterEl);
 }
+
 
 /* Hearts */
 function spawnHearts(n){
